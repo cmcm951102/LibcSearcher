@@ -30,6 +30,7 @@ obj.dump("__libc_start_main_ret")
 ```
 
 如果遇到返回多个libc版本库的情况，可以通过`add_condition(leaked_func, leaked_address)`来添加限制条件，也可以手工选择其中一个libc版本（如果你确定的话）。
+**PS：改动：多个libc结果现在存储在LibcSearcher.result中，手工指定LibcSearcher.db=LibcSearcher.result[i] 即可更改版本进行dump**
 
 ## 其它
 
