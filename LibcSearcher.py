@@ -14,6 +14,7 @@ class LibcSearcher(object):
         self.libc_database_path = os.path.join(
             os.path.realpath(os.path.dirname(__file__)), "libc-database/db/")
         self.db = ""
+        self.result = []
 
     def add_condition(self, func, address):
         if not isinstance(func, str):
@@ -41,23 +42,23 @@ class LibcSearcher(object):
         for _, _, f in os.walk(db):
             files += f
 
-        result = []
         for ff in files:
-            fd = open(db + ff, "rb")
-            data = fd.read().decode(errors='ignore').split("\n")
-            for x in res:
-                if any(map(lambda line: x.match(line), data)):
-                    result.append(ff)
-            fd.close()
+            if ff.endswith(".symbols"):
+                fd = open(db + ff, "rb")
+                data = fd.read().decode(errors='ignore').split("\n")
+                for x in res:
+                    if any(map(lambda line: x.match(line), data)):
+                        self.result.append(ff)
+                fd.close()
 
-        if len(result) == 0:
+        if len(self.result) == 0:
             print("No matched libc, please add more libc or try others")
             sys.exit(0)
 
-        if len(result) > 1:
+        if len(self.result) > 1:
             print("Multi Results:")
-            for x in range(len(result)):
-                print("%2d: %s" % (x, self.pmore(result[x])))
+            for x in range(len(self.result)):
+                print("%2d: %s" % (x, self.pmore(self.result[x])))
             print("Please supply more info using \n\tadd_condition(leaked_func, leaked_address).")
             while True:
                 in_id = input(
@@ -66,12 +67,12 @@ class LibcSearcher(object):
                     sys.exit(0)
                 try:
                     in_id = int(in_id)
-                    self.db = result[in_id]
+                    self.db = self.result[in_id]
                     break
                 except:
                     continue
         else:
-            self.db = result[0]
+            self.db = self.result[0]
         print("[+] %s be choosed." % self.pmore(self.db))
 
     def pmore(self, result):
